@@ -1,0 +1,13 @@
+[run]
+branch = True
+parallel = True
+concurrency = multiprocessing,thread
+
+[report]
+
+   
+precision = 2
+skip_covered = False
+
+[html]
+directory = htmlcov

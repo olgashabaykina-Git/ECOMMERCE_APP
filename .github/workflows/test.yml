@@ -1,0 +1,94 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Google Chrome
+      - name: Install Google Chrome
+        run: |
+          echo "Installing Google Chrome..."
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      # 3. Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 4. Clean Python cache and install dependencies
+      - name: Clear Python cache
+        run: |
+          echo "Clearing Python cache..."
+          find . -type d -name "__pycache__" -exec rm -rf {} +
+
+      - name: Install Python dependencies
+        run: |
+          echo "Installing dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install selenium webdriver-manager pytest pytest-html pytest-cov pytest-timeout flask coverage
+
+      # 5. Start the application server
+      - name: Start application server
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          echo "Starting application server..."
+          coverage run --parallel-mode -m app &
+          sleep 5
+          curl --retry 5 --retry-connrefused http://127.0.0.1:5001 || exit 1
+
+      # 6. Run unit tests
+      - name: Run unit tests
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          echo "Running unit tests..."
+          pytest tests/test_unit.py --html=unit_test_report.html --self-contained-html --timeout=60 --cov=app --cov-append --cov-report=term-missing
+
+      # 7. Run integration tests
+      - name: Run integration tests
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          echo "Running integration tests..."
+          pytest tests/test_integration.py --html=integration_test_report.html --self-contained-html --timeout=60 --cov=app --cov-append --cov-report=term-missing
+
+      # 8. Run end-to-end tests with Xvfb
+      - name: Run end-to-end tests
+        run: |
+          echo "Setting up Xvfb for headless testing..."
+          sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+
+          echo "Running Selenium tests..."
+          pytest tests/test_e2e.py --html=e2e_test_report.html --self-contained-html --timeout=120 --cov=app --cov-append --cov-report=term-missing
+
+     
+
+      # 9. Upload HTML reports
+      - name: Upload HTML reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            unit_test_report.html
+            integration_test_report.html
+            e2e_test_report.html
