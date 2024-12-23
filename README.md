@@ -31,7 +31,7 @@ The E-Commerce App is a Flask-based web application designed for demonstrating u
 1. **Clone the Repository**:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/olgashabaykina-Git/ECOMMERCE_APP.git
    cd ecommerce_app
    ```
 
