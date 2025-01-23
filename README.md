@@ -77,7 +77,7 @@ The E-Commerce App is a Flask-based web application designed for demonstrating u
 
    Navigate to http://127.0.0.1:5001 in your web browser.
 
-8. To log in using these details: Usersname = user
+8. To log in using these details: Usersname = user,
 Password = password
 
 
