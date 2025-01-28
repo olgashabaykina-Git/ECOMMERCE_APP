@@ -1,5 +1,16 @@
 version: '3.7'
 services:
+
+  app:
+    build: .
+    container_name: ecommerce_app
+    ports:
+      - "5001:5001"  
+    environment:
+      - FLASK_ENV=production
+      - FLASK_SECRET_KEY= 75fc72bdf8d7572cff5f9570d362f4c9b2da154a33ab37562a324647ad965fac
+    restart: unless-stopped
+  
   prometheus:
     image: prom/prometheus
     container_name: prometheus

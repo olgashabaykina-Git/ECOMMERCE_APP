@@ -15,7 +15,6 @@ if os.getenv('COVERAGE_RUN') == 'true':
 
 
 
-
 # Logging configuration
 logging.basicConfig(
     level=logging.DEBUG, 
@@ -140,4 +139,4 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': make_wsgi_app(reg
 
 if __name__ == "__main__":
     logging.info("Starting Flask application...")
-    app.run(debug=True, port=5001)
+    app.run(host="0.0.0.0", port=5001, debug=True)
