@@ -142,4 +142,4 @@ jobs:
 
       - name: Run Load Testing with Locust
         run: |
-          locust -f load_test.py --headless --users 100 --spawn-rate 10 --host http://localhost:5001
+          locust -f tests/load_test.py --headless --users 100 --spawn-rate 10 --host http://localhost:5001
