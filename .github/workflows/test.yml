@@ -136,11 +136,17 @@ jobs:
           echo "Verifying deployment..."
           curl --retry 5 --retry-connrefused http://127.0.0.1:5001 || exit 1
          
-      # 9. Load testing with Locust
+     # 9. Load testing with Locust
       - name: Install Locust
         run: pip install locust
 
+      - name: Wait for the server to start
+        run: sleep 15  
+
+      - name: Show logs if the app fails
+        run: docker logs $(docker ps -q --filter "name=ecommerce_app") || true
+
       - name: Run Load Testing with Locust
         run: |
-          locust -f tests/load_test.py --headless --users 100 --spawn-rate 10 --host http://localhost:500 --run-time 2m
-        timeout-minutes: 3  
+          locust -f tests/load_test.py --headless --users 100 --spawn-rate 10 --host http://localhost:5001 --run-time 2m
+        timeout-minutes: 3
