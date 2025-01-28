@@ -81,8 +81,6 @@ jobs:
           echo "Running Selenium tests..."
           pytest tests/test_e2e.py --html=e2e_test_report.html --self-contained-html --timeout=120 --cov=app --cov-append --cov-report=term-missing
 
-     
-
       # 9. Upload HTML reports
       - name: Upload HTML reports
         uses: actions/upload-artifact@v4
@@ -92,48 +90,53 @@ jobs:
             unit_test_report.html
             integration_test_report.html
             e2e_test_report.html
-            
-            
+
   deploy:
     needs: run-tests
     runs-on: ubuntu-latest
     
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Set up Docker
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      # Install docker-compose
+      # 3. Install docker-compose
       - name: Install Docker Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
+      # 4. Build and start Docker containers
       - name: Build and start Docker containers
         run: |
           docker-compose up -d --build
           docker ps -a  # Checking running containers
      
-     - name: Wait for the server to start
+      # 5. Wait for the server to start
+      - name: Wait for the server to start
         run: sleep 30  
         
-     - name: Show logs if the app fails
+      # 6. Show logs if the app fails
+      - name: Show logs if the app fails
         run: docker logs $(docker ps -q --filter "name=ecommerce_app") || true
 
-     
+      # 7. Build and push Docker image
       - name: Build and push Docker image
         run: |
           docker build -t my-app:latest .
           docker-compose up -d
 
+      # 8. Verify deployment
       - name: Verify deployment
         run: |
           echo "Verifying deployment..."
           curl --retry 5 --retry-connrefused http://127.0.0.1:5001 || exit 1
          
-          #  Load testing with Locust
+      # 9. Load testing with Locust
       - name: Install Locust
         run: pip install locust
 
