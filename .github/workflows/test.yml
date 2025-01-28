@@ -120,7 +120,7 @@ jobs:
         run: |
           echo "Verifying deployment..."
           sleep 10
-          curl --retry 5 --retry-connrefused http://127.0.0.1:8000 || exit 1
+          curl --retry 5 --retry-connrefused http://127.0.0.1:5001 || exit 1
      
       - name: Build and push Docker image
         run: |
@@ -131,4 +131,4 @@ jobs:
         run: |
           echo "Verifying deployment..."
           sleep 10
-          curl --retry 5 --retry-connrefused http://127.0.0.1:8000 || exit 1
+          curl --retry 5 --retry-connrefused http://127.0.0.1:5001 || exit 1
